@@ -1,4 +1,3 @@
-# main.py
 import os
 from dotenv import load_dotenv
 from etl.processing.data_cleaner import DataCleaner
@@ -36,6 +35,7 @@ def main():
 
     try:
         mongo_docs = processor.prepare_mongodb_documents()
+        # insertar todas las colecciones preparadas
         for name, records in mongo_docs.items():
             mongo_handler.insert_many(name, records)
         print("Datos cargados exitosamente en MongoDB\n")
@@ -44,19 +44,15 @@ def main():
         print(f"Error al cargar datos en MongoDB: {e}")
         return
 
-    # FASE 3: ANÁLISIS Y RESULTADOS
+    # FASE 3: ANÁLISIS Y RESULTADOS (compatibilidad: processed_results apunta a KMeans)
     print("FASE 3: ANÁLISIS Y RESULTADOS")
     results = processor.processed_results or {}
 
     print("Resultados procesados:")
     warehouses = results.get("warehouses", [])
-    correlations = results.get("economic_correlations", {})
+    correlations = results.get("economic_correlations", {}) or results.get("economic_analysis", {})
     metrics = results.get("metrics", {})
 
-    print(f" - Warehouses generados: {len(warehouses)}")
-    print(f" - Correlaciones económicas: {correlations}")
-    print(f" - Métricas: {metrics}")
-    print(f" - Fecha de procesamiento: {results.get('timestamp', None)}")
 
     print("\nSistema ETL finalizado correctamente")
 

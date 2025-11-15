@@ -1,4 +1,3 @@
-# mongo_handler.py
 from pymongo import MongoClient
 
 
@@ -34,7 +33,7 @@ class MongoDBHandler:
     def insert_many(self, collection_name, documents):
         """
         Inserta una lista de documentos en una colección.
-        Si la colección ya existe, la reemplaza completamente.
+        Si la colección ya exista, la reemplaza completamente.
         """
         if self.db is None:
             raise Exception("Base de datos no inicializada. Llamar a connect() primero.")
