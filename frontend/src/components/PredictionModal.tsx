@@ -63,7 +63,7 @@ const consumptionCategories = [
   { value: "sports", label: "Deportes" },
 ];
 
-const forecastYears = ["2024", "2025", "2026", "2027", "2028", "2029", "2030"];
+const forecastYears = ["2026", "2027", "2028", "2029", "2030"];
 
 const PredictionModal = ({ open, onOpenChange, onPredictionComplete }: PredictionModalProps) => {
   const [loading, setLoading] = useState(false);
