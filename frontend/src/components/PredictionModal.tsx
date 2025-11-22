@@ -183,13 +183,13 @@ const PredictionModal = ({ open, onOpenChange, onPredictionComplete }: Predictio
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quarter">Año</Label>
+              <Label htmlFor="year">Año</Label>
               <Select
                 value={formData.year}
                 onValueChange={(value) => setFormData({ ...formData, year: value })}
                 required
               >
-                <SelectTrigger id="quarter">
+                <SelectTrigger id="year">
                   <SelectValue placeholder="2025, 2026..." />
                 </SelectTrigger>
                 <SelectContent>
