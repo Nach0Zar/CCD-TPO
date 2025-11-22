@@ -23,15 +23,57 @@ export interface PredictionResult {
   };
 }
 
+const brazilStates = [
+  { value: "acre", label: "Acre" },
+  { value: "alagoas", label: "Alagoas" },
+  { value: "amapa", label: "Amapa" },
+  { value: "amazonas", label: "Amazonas" },
+  { value: "bahia", label: "Bahia" },
+  { value: "ceara", label: "Ceara" },
+  { value: "distrito-federal", label: "Distrito Federal" },
+  { value: "espirito-santo", label: "Espirito Santo" },
+  { value: "goias", label: "Goias" },
+  { value: "maranhao", label: "Maranhao" },
+  { value: "mato-grosso", label: "Mato Grosso" },
+  { value: "mato-grosso-do-sul", label: "Mato Grosso do Sul" },
+  { value: "minas-gerais", label: "Minas Gerais" },
+  { value: "para", label: "Para" },
+  { value: "paraiba", label: "Paraiba" },
+  { value: "parana", label: "Parana" },
+  { value: "pernambuco", label: "Pernambuco" },
+  { value: "piaui", label: "Piaui" },
+  { value: "rio-de-janeiro", label: "Rio de Janeiro" },
+  { value: "rio-grande-do-norte", label: "Rio Grande do Norte" },
+  { value: "rio-grande-do-sul", label: "Rio Grande do Sul" },
+  { value: "rondonia", label: "Rondonia" },
+  { value: "roraima", label: "Roraima" },
+  { value: "santa-catarina", label: "Santa Catarina" },
+  { value: "sao-paulo", label: "Sao Paulo" },
+  { value: "sergipe", label: "Sergipe" },
+  { value: "tocantins", label: "Tocantins" },
+];
+
+const consumptionCategories = [
+  { value: "all", label: "Todas" },
+  { value: "electronics", label: "Electronica" },
+  { value: "fashion", label: "Moda" },
+  { value: "home", label: "Hogar" },
+  { value: "beauty", label: "Belleza" },
+  { value: "sports", label: "Deportes" },
+];
+
+const forecastYears = ["2024", "2025", "2026", "2027", "2028", "2029", "2030"];
+
 const PredictionModal = ({ open, onOpenChange, onPredictionComplete }: PredictionModalProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    country: "",
+    state: "",
+    category: "",
+    year: "",
     gdp: "",
     inflation: "",
     unemployment: "",
-    quarter: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,11 +103,12 @@ const PredictionModal = ({ open, onOpenChange, onPredictionComplete }: Predictio
 
       // Reset form
       setFormData({
-        country: "",
+        state: "",
+        category: "",
+        year: "",
         gdp: "",
         inflation: "",
         unemployment: "",
-        quarter: "",
       });
     }, 2000);
   };
@@ -81,21 +124,17 @@ const PredictionModal = ({ open, onOpenChange, onPredictionComplete }: Predictio
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="country">País</Label>
+            <Label htmlFor="state">Estado</Label>
             <Select
-              value={formData.country}
-              onValueChange={(value) => setFormData({ ...formData, country: value })}
+              value={formData.state}
+              onValueChange={(value) => setFormData({ ...formData, state: value })}
               required
             >
-              <SelectTrigger id="country">
-                <SelectValue placeholder="Selecciona un país" />
+              <SelectTrigger id="state">
+                <SelectValue placeholder="Selecciona un estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="mexico">México</SelectItem>
-                <SelectItem value="argentina">Argentina</SelectItem>
-                <SelectItem value="chile">Chile</SelectItem>
-                <SelectItem value="colombia">Colombia</SelectItem>
-                <SelectItem value="peru">Perú</SelectItem>
+                {brazilStates.map((state) => <SelectItem value={state.value}>{state.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -143,25 +182,42 @@ const PredictionModal = ({ open, onOpenChange, onPredictionComplete }: Predictio
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quarter">Trimestre</Label>
+              <Label htmlFor="quarter">Año</Label>
               <Select
-                value={formData.quarter}
-                onValueChange={(value) => setFormData({ ...formData, quarter: value })}
+                value={formData.year}
+                onValueChange={(value) => setFormData({ ...formData, year: value })}
                 required
               >
                 <SelectTrigger id="quarter">
-                  <SelectValue placeholder="Q1, Q2..." />
+                  <SelectValue placeholder="2025, 2026..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="q1">Q1 2024</SelectItem>
-                  <SelectItem value="q2">Q2 2024</SelectItem>
-                  <SelectItem value="q3">Q3 2024</SelectItem>
-                  <SelectItem value="q4">Q4 2024</SelectItem>
+                  {forecastYears.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
+            
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="category">Categoria</Label>
+            <Select
+              value={formData.category}
+              onValueChange={(value) => setFormData({ ...formData, category: value })}
+              required
+            >
+              <SelectTrigger id="category">
+                <SelectValue placeholder="Selecciona una categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {brazilStates.map((category) => <SelectItem value={category.value}>{category.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
