@@ -24,6 +24,7 @@ export interface PredictionResult {
 }
 
 const brazilStates = [
+  { value: "all", label: "Todas" },
   { value: "acre", label: "Acre" },
   { value: "alagoas", label: "Alagoas" },
   { value: "amapa", label: "Amapa" },
@@ -214,7 +215,7 @@ const PredictionModal = ({ open, onOpenChange, onPredictionComplete }: Predictio
                 <SelectValue placeholder="Selecciona una categoria" />
               </SelectTrigger>
               <SelectContent>
-                {brazilStates.map((category) => <SelectItem value={category.value}>{category.label}</SelectItem>)}
+                {consumptionCategories.map((category) => <SelectItem value={category.value}>{category.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
