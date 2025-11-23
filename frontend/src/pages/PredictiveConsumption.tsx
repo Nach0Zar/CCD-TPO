@@ -164,6 +164,68 @@ const PredictiveConsumption = () => {
     } as echarts.EChartsOption;
   }, [growthStats]);
 
+  const meanGrowthOption = useMemo(() => {
+    if (!growthStats.categories.length) return null;
+
+    const categories = growthStats.categories.map((algorithm) => algorithmStyles[algorithm].label);
+    const mean1y = growthStats.categories.map(
+      (algorithm) => growthStats.byAlgorithm[algorithm]?.growth1y?.mean ?? 0,
+    );
+    const mean2y = growthStats.categories.map(
+      (algorithm) => growthStats.byAlgorithm[algorithm]?.growth2y?.mean ?? 0,
+    );
+
+    if (!mean1y.some((value) => value > 0) && !mean2y.some((value) => value > 0)) return null;
+
+    return {
+      tooltip: {
+        trigger: "axis",
+        axisPointer: { type: "shadow" },
+        formatter: (params: any) => {
+          const dataIndex = params?.[0]?.dataIndex ?? 0;
+          const algorithm = growthStats.categories[dataIndex];
+          return `
+            <div style="min-width:200px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <strong>${algorithmStyles[algorithm].label}</strong>
+              </div>
+              <div style="margin-top:6px;font-size:12px;line-height:1.6;">
+                <div>Media año 1: ${mean1y[dataIndex]?.toFixed(0) ?? "-"}</div>
+                <div>Media año 2: ${mean2y[dataIndex]?.toFixed(0) ?? "-"}</div>
+              </div>
+            </div>
+          `;
+        },
+      },
+      legend: { data: ["Media año 1", "Media año 2"], icon: "circle", bottom: 0 },
+      grid: { left: "3%", right: "4%", bottom: "16%", containLabel: true },
+      xAxis: { type: "category", data: categories, axisLabel: { rotate: 10 } },
+      yAxis: {
+        type: "value",
+        name: "Clientes proyectados (media)",
+        splitLine: { lineStyle: { type: "dashed" } },
+      },
+      series: [
+        {
+          name: "Media año 1",
+          type: "bar",
+          data: mean1y,
+          itemStyle: { color: "#0ea5e9" },
+          label: { show: true, position: "top", formatter: "{c}" },
+          barMaxWidth: 42,
+        },
+        {
+          name: "Media año 2",
+          type: "bar",
+          data: mean2y,
+          itemStyle: { color: "#8b5cf6" },
+          label: { show: true, position: "top", formatter: "{c}" },
+          barMaxWidth: 42,
+        },
+      ],
+    } as echarts.EChartsOption;
+  }, [growthStats]);
+
   const mapOption = useMemo(
     () => ({
       backgroundColor: "transparent",
@@ -377,6 +439,31 @@ const PredictiveConsumption = () => {
             ) : (
               <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground">
                 No hay datos de crecimiento disponibles para los filtros actuales.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Media de crecimiento por algoritmo</CardTitle>
+            <CardDescription>
+              Comparación de la media de crecimiento de clientes proyectados a 1 y 2 años en formato de barras
+              agrupadas.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Calculando medias de crecimiento...
+              </div>
+            ) : isError ? (
+              <div className="text-sm text-red-600">No se pudo obtener la información. Intenta nuevamente más tarde.</div>
+            ) : meanGrowthOption ? (
+              <ReactECharts option={meanGrowthOption} style={{ height: "420px" }} />
+            ) : (
+              <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground">
+                No hay datos de medias disponibles para los filtros actuales.
               </div>
             )}
           </CardContent>
