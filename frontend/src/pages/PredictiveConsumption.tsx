@@ -58,6 +58,112 @@ const PredictiveConsumption = () => {
 
   const activeAlgorithms = selectedAlgorithms.length ? selectedAlgorithms : algorithmOrder;
 
+  const growthStats = useMemo(() => {
+    const byAlgorithm = activeAlgorithms.reduce(
+      (acc, algorithm) => {
+        const warehouses = filteredLocations.filter((location) => location.algorithm === algorithm);
+        const growth1y = warehouses
+          .map((warehouse) => warehouse.estimated_customer_growth_1y)
+          .filter((value): value is number => typeof value === "number");
+        const growth2y = warehouses
+          .map((warehouse) => warehouse.estimated_customer_growth_2y)
+          .filter((value): value is number => typeof value === "number");
+
+        const computeBoxData = (values: number[]) => {
+          if (!values.length) return null;
+          const sorted = [...values].sort((a, b) => a - b);
+          const percentile = (p: number) => {
+            const position = (sorted.length - 1) * p;
+            const base = Math.floor(position);
+            const rest = position - base;
+            return sorted[base] + rest * (sorted[base + 1] - sorted[base] || 0);
+          };
+
+          const mean = sorted.reduce((sum, value) => sum + value, 0) / sorted.length;
+          return {
+            box: [sorted[0], percentile(0.25), percentile(0.5), percentile(0.75), sorted[sorted.length - 1]],
+            mean,
+          };
+        };
+
+        return {
+          ...acc,
+          [algorithm]: {
+            count: warehouses.length,
+            growth1y: computeBoxData(growth1y),
+            growth2y: computeBoxData(growth2y),
+          },
+        };
+      },
+      {} as Record<AlgorithmType, { count: number; growth1y: { box: number[]; mean: number } | null; growth2y: { box: number[]; mean: number } | null }>,
+    );
+
+    const categories = activeAlgorithms.filter((algorithm) => byAlgorithm[algorithm]?.count);
+
+    return { byAlgorithm, categories };
+  }, [activeAlgorithms, filteredLocations]);
+
+  const boxplotOption = useMemo(() => {
+    if (!growthStats.categories.length) return null;
+
+    const seriesFactory = (
+      label: string,
+      key: "growth1y" | "growth2y",
+      color: string,
+    ): echarts.EChartsOption["series"] => ({
+      name: label,
+      type: "boxplot",
+      itemStyle: { color, borderColor: color },
+      emphasis: { itemStyle: { color, borderColor: color, opacity: 0.7 } },
+      data: growthStats.categories.map((algorithm) => growthStats.byAlgorithm[algorithm]?.[key]?.box || [0, 0, 0, 0, 0]),
+      tooltip: {
+        formatter: (params: any) => {
+          const algorithm = growthStats.categories[params.dataIndex];
+          const stat = growthStats.byAlgorithm[algorithm]?.[key];
+          const mean = stat?.mean;
+          const labelText = key === "growth1y" ? "Crecimiento 1 año" : "Crecimiento 2 años";
+          return `
+            <div style="min-width:200px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color}"></span>
+                <strong>${algorithmStyles[algorithm].label}</strong>
+              </div>
+              <div style="margin-top:6px;font-size:12px;line-height:1.5;">
+                <div>${labelText}</div>
+                ${mean ? `<div>Media: ${mean.toFixed(0)}</div>` : ""}
+                <div>Warehouses analizados: ${growthStats.byAlgorithm[algorithm]?.count ?? 0}</div>
+              </div>
+            </div>
+          `;
+        },
+      },
+    });
+
+    return {
+      tooltip: { trigger: "item", axisPointer: { type: "shadow" } },
+      legend: {
+        data: ["Crecimiento 1 año", "Crecimiento 2 años"],
+        icon: "circle",
+        bottom: 0,
+      },
+      grid: { left: "3%", right: "4%", bottom: "16%", containLabel: true },
+      xAxis: {
+        type: "category",
+        data: growthStats.categories.map((algorithm) => algorithmStyles[algorithm].label),
+        axisLabel: { rotate: 10 },
+      },
+      yAxis: {
+        type: "value",
+        name: "Clientes proyectados",
+        splitLine: { lineStyle: { type: "dashed" } },
+      },
+      series: [
+        seriesFactory("Crecimiento 1 año", "growth1y", "#0ea5e9"),
+        seriesFactory("Crecimiento 2 años", "growth2y", "#8b5cf6"),
+      ],
+    } as echarts.EChartsOption;
+  }, [growthStats]);
+
   const mapOption = useMemo(
     () => ({
       backgroundColor: "transparent",
@@ -247,6 +353,30 @@ const PredictiveConsumption = () => {
             ) : (
               <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground">
                 No hay ubicaciones para mostrar con los filtros actuales.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Evolución de crecimiento proyectado</CardTitle>
+            <CardDescription>
+              Distribución de crecimiento de clientes por algoritmo, comparando proyecciones a 1 y 2 años.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Calculando métricas de crecimiento...
+              </div>
+            ) : isError ? (
+              <div className="text-sm text-red-600">No se pudo obtener la información. Intenta nuevamente más tarde.</div>
+            ) : growthStats.categories.length && boxplotOption ? (
+              <ReactECharts option={boxplotOption} style={{ height: "420px" }} />
+            ) : (
+              <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground">
+                No hay datos de crecimiento disponibles para los filtros actuales.
               </div>
             )}
           </CardContent>
