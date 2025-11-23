@@ -7,7 +7,7 @@ const defaultCollections: { name: string; algorithm?: AlgorithmType }[] = [
   { name: "processed_results_minibatch", algorithm: "minibatchkmeans" },
 ];
 
-const shouldUseBackend = () => String(import.meta.env.VITE_USE_BACKEND).toLowerCase() === "true";
+const isLikelyConnectionString = (value?: string) => value?.startsWith("mongodb");
 
 const getConfiguredCollections = () => {
   const rawCollections = import.meta.env.VITE_MONGO_COLLECTIONS?.split(",")
@@ -52,6 +52,12 @@ const fetchWarehousesFromMongo = async (): Promise<PredictiveWarehouse[]> => {
   const apiKey = import.meta.env.VITE_MONGO_DATA_API_KEY;
   const database = import.meta.env.VITE_MONGO_DATABASE;
   const dataSource = import.meta.env.VITE_MONGO_DATA_SOURCE;
+
+  if (isLikelyConnectionString(apiUrl)) {
+    throw new Error(
+      "Mongo Data API URL appears to be a connection string. Frontend cannot talk directly to Mongo; use backend instead.",
+    );
+  }
 
   if (!apiUrl || !apiKey || !database || !dataSource) {
     console.warn(
@@ -113,14 +119,37 @@ const fetchWarehousesFromBackend = async (): Promise<PredictiveWarehouse[]> => {
 };
 
 export const fetchWarehousePredictions = async (): Promise<PredictiveWarehouse[]> => {
-  if (shouldUseBackend()) {
-    return fetchWarehousesFromBackend();
+  const errors: unknown[] = [];
+  const shouldPreferBackend =
+    import.meta.env.VITE_USE_BACKEND === "true" ||
+    isLikelyConnectionString(import.meta.env.VITE_MONGO_DATA_API_URL);
+
+  try {
+    if (shouldPreferBackend) {
+      return await fetchWarehousesFromBackend();
+    }
+  } catch (error) {
+    errors.push(error);
   }
 
   try {
-    return await fetchWarehousesFromMongo();
+    const data = await fetchWarehousesFromMongo();
+    if (data.length) return data;
   } catch (error) {
-    console.error("Failed to fetch from Mongo Data API, falling back to local dataset.", error);
-    return warehouseLocations;
+    errors.push(error);
   }
+
+  if (!shouldPreferBackend) {
+    try {
+      return await fetchWarehousesFromBackend();
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+
+  if (errors.length) {
+    console.error("Falling back to local dataset after failing to reach backend/DB.", errors);
+  }
+
+  return warehouseLocations;
 };

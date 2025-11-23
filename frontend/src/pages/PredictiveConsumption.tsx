@@ -14,7 +14,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { fetchWarehousePredictions } from "@/services/predictiveService";
 import type { AlgorithmType, PredictiveWarehouse } from "@/services/predictiveTypes";
-import { algorithmOrder } from "@/data/warehouseLocations";
 import brazilGeoJson from "@/data/brazil_geo.json";
 
 const algorithmStyles: Record<AlgorithmType, { label: string; color: string }> = {
@@ -23,13 +22,15 @@ const algorithmStyles: Record<AlgorithmType, { label: string; color: string }> =
   minibatchkmeans: { label: "MinibatchKMeans", color: "#ef4444" },
 };
 
+const knownAlgorithms: AlgorithmType[] = ["gmm", "kmeans", "minibatchkmeans"];
+
 const PredictiveConsumption = () => {
   const { data: warehouseData = [], isLoading, isError } = useQuery({
     queryKey: ["predictive-warehouses"],
     queryFn: fetchWarehousePredictions,
   });
 
-  const [selectedAlgorithms, setSelectedAlgorithms] = useState<AlgorithmType[]>(algorithmOrder);
+  const [selectedAlgorithms, setSelectedAlgorithms] = useState<AlgorithmType[]>(knownAlgorithms);
 
   useEffect(() => {
     if (!echarts.getMap("brazil")) {
@@ -37,12 +38,19 @@ const PredictiveConsumption = () => {
     }
   }, []);
 
+  const availableAlgorithms = useMemo<AlgorithmType[]>(
+    () =>
+      (warehouseData.length
+        ? Array.from(new Set(warehouseData.map((item) => item.algorithm)))
+        : knownAlgorithms) as AlgorithmType[],
+    [warehouseData],
+  );
+
   useEffect(() => {
     if (warehouseData.length) {
-      const available = Array.from(new Set(warehouseData.map((item) => item.algorithm))) as AlgorithmType[];
-      setSelectedAlgorithms(available);
+      setSelectedAlgorithms(availableAlgorithms);
     }
-  }, [warehouseData]);
+  }, [warehouseData, availableAlgorithms]);
 
   const filteredLocations = useMemo(
     () => warehouseData.filter((location) => selectedAlgorithms.includes(location.algorithm)),
@@ -56,7 +64,7 @@ const PredictiveConsumption = () => {
     }, {} as Record<AlgorithmType, number>);
   }, [warehouseData]);
 
-  const activeAlgorithms = selectedAlgorithms.length ? selectedAlgorithms : algorithmOrder;
+  const activeAlgorithms = selectedAlgorithms.length ? selectedAlgorithms : availableAlgorithms;
 
   const mapOption = useMemo(
     () => ({
