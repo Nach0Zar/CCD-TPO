@@ -11,16 +11,11 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-<<<<<<< Updated upstream
 import { useQuery } from "@tanstack/react-query";
 import { fetchWarehousePredictions } from "@/services/predictiveService";
 import type { AlgorithmType, PredictiveWarehouse } from "@/services/predictiveTypes";
 import { algorithmOrder } from "@/data/warehouseLocations";
-import brazilGeoJson from "@/data/brazilGeoJson";
-=======
-import { AlgorithmType, warehouseLocations } from "@/data/warehouseLocations";
 import brazilGeoJson from "@/data/brazil_geo.json";
->>>>>>> Stashed changes
 
 const algorithmStyles: Record<AlgorithmType, { label: string; color: string }> = {
   kmeans: { label: "KMeans", color: "#2563eb" },
