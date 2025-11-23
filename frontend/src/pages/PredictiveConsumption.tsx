@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
-import { Filter, ChevronDown, MapPin } from "lucide-react";
+import { Filter, ChevronDown, MapPin, Loader2 } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,18 +11,25 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AlgorithmType, warehouseLocations } from "@/data/warehouseLocations";
+import { useQuery } from "@tanstack/react-query";
+import { fetchWarehousePredictions } from "@/services/predictiveService";
+import type { AlgorithmType, PredictiveWarehouse } from "@/services/predictiveTypes";
+import { algorithmOrder } from "@/data/warehouseLocations";
 import brazilGeoJson from "@/data/brazilGeoJson";
 
 const algorithmStyles: Record<AlgorithmType, { label: string; color: string }> = {
-  MinibatchKMeans: { label: "MinibatchKMeans", color: "#ef4444" },
-  KMeans: { label: "KMeans", color: "#2563eb" },
-  GMM: { label: "GMM", color: "#22c55e" },
+  kmeans: { label: "KMeans", color: "#2563eb" },
+  gmm: { label: "GMM", color: "#22c55e" },
+  minibatchkmeans: { label: "MinibatchKMeans", color: "#ef4444" },
 };
 
 const PredictiveConsumption = () => {
-  const allAlgorithms = Object.keys(algorithmStyles) as AlgorithmType[];
-  const [selectedAlgorithms, setSelectedAlgorithms] = useState<AlgorithmType[]>(allAlgorithms);
+  const { data: warehouseData = [], isLoading, isError } = useQuery({
+    queryKey: ["predictive-warehouses"],
+    queryFn: fetchWarehousePredictions,
+  });
+
+  const [selectedAlgorithms, setSelectedAlgorithms] = useState<AlgorithmType[]>(algorithmOrder);
 
   useEffect(() => {
     if (!echarts.getMap("brazil")) {
@@ -30,19 +37,26 @@ const PredictiveConsumption = () => {
     }
   }, []);
 
-  const handleAlgorithmChange = (algorithm: AlgorithmType, checked: boolean) => {
-    setSelectedAlgorithms((prev) => {
-      if (checked) {
-        return prev.includes(algorithm) ? prev : [...prev, algorithm];
-      }
-      return prev.filter((item) => item !== algorithm);
-    });
-  };
+  useEffect(() => {
+    if (warehouseData.length) {
+      const available = Array.from(new Set(warehouseData.map((item) => item.algorithm))) as AlgorithmType[];
+      setSelectedAlgorithms(available);
+    }
+  }, [warehouseData]);
 
   const filteredLocations = useMemo(
-    () => warehouseLocations.filter((location) => selectedAlgorithms.includes(location.algorithm)),
-    [selectedAlgorithms],
+    () => warehouseData.filter((location) => selectedAlgorithms.includes(location.algorithm)),
+    [warehouseData, selectedAlgorithms],
   );
+
+  const totalByAlgorithm = useMemo(() => {
+    return warehouseData.reduce<Record<AlgorithmType, number>>((acc, current) => {
+      acc[current.algorithm] = (acc[current.algorithm] || 0) + 1;
+      return acc;
+    }, {} as Record<AlgorithmType, number>);
+  }, [warehouseData]);
+
+  const activeAlgorithms = selectedAlgorithms.length ? selectedAlgorithms : algorithmOrder;
 
   const mapOption = useMemo(
     () => ({
@@ -51,17 +65,27 @@ const PredictiveConsumption = () => {
         trigger: "item",
         borderColor: "hsl(var(--border))",
         formatter: (params: any) => {
-          const data = params.data;
+          const data: PredictiveWarehouse = params.data;
           const color = algorithmStyles[data.algorithm as AlgorithmType]?.color;
           return `
-            <div style="min-width: 180px;">
+            <div style="min-width: 220px;">
               <div style="display:flex;align-items:center;gap:8px;">
                 <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color}"></span>
                 <strong>${params.name}</strong>
               </div>
-              <div style="margin-top:6px;font-size:12px;">
-                <div>Algoritmo: ${data.algorithm}</div>
+              <div style="margin-top:6px;font-size:12px;line-height:1.5;">
+                <div>Algoritmo: ${algorithmStyles[data.algorithm]?.label ?? data.algorithm}</div>
                 <div>Clientes: ${data.customer_count}</div>
+                ${
+                  data.estimated_delivery_improvement_pct
+                    ? `<div>Mejora estimada: ${data.estimated_delivery_improvement_pct}%</div>`
+                    : ""
+                }
+                ${
+                  data.estimated_customer_growth_1y
+                    ? `<div>Crecimiento 1 año: ${data.estimated_customer_growth_1y}</div>`
+                    : ""
+                }
                 ${data.note ? `<div>Nota: ${data.note}</div>` : ""}
               </div>
             </div>
@@ -94,6 +118,8 @@ const PredictiveConsumption = () => {
             algorithm: location.algorithm,
             customer_count: location.customer_count,
             note: location.note,
+            estimated_delivery_improvement_pct: location.estimated_delivery_improvement_pct,
+            estimated_customer_growth_1y: location.estimated_customer_growth_1y,
           })),
           symbolSize: (val: number[]) => Math.max(8, Math.min(18, (val?.[2] ?? 0) / 150)),
           itemStyle: {
@@ -142,11 +168,15 @@ const PredictiveConsumption = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-72">
-                {allAlgorithms.map((algorithm) => (
+                {activeAlgorithms.map((algorithm) => (
                   <DropdownMenuCheckboxItem
                     key={algorithm}
                     checked={selectedAlgorithms.includes(algorithm)}
-                    onCheckedChange={(checked) => handleAlgorithmChange(algorithm, Boolean(checked))}
+                    onCheckedChange={(checked) =>
+                      setSelectedAlgorithms((prev) =>
+                        checked ? [...new Set([...prev, algorithm])] : prev.filter((item) => item !== algorithm),
+                      )
+                    }
                   >
                     <div className="flex w-full items-center justify-between gap-3">
                       <span>{algorithmStyles[algorithm].label}</span>
@@ -161,8 +191,8 @@ const PredictiveConsumption = () => {
             </DropdownMenu>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-3">
-            {allAlgorithms.map((algorithm) => {
-              const total = warehouseLocations.filter((item) => item.algorithm === algorithm).length;
+            {activeAlgorithms.map((algorithm) => {
+              const total = totalByAlgorithm[algorithm] ?? 0;
               const isActive = selectedAlgorithms.includes(algorithm);
               return (
                 <div
@@ -195,8 +225,8 @@ const PredictiveConsumption = () => {
               Puntos georreferenciados sobre un mapa de Brasil según el algoritmo seleccionado.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="h-4 w-4" />
               {selectedAlgorithms.length ? (
                 <span>
@@ -206,7 +236,19 @@ const PredictiveConsumption = () => {
                 <span>Selecciona al menos un algoritmo para visualizar los puntos.</span>
               )}
             </div>
-            <ReactECharts option={mapOption} style={{ height: "520px" }} />
+            {isLoading ? (
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Cargando datos predictivos...
+              </div>
+            ) : isError ? (
+              <div className="text-sm text-red-600">No se pudo obtener la información. Intenta nuevamente más tarde.</div>
+            ) : filteredLocations.length ? (
+              <ReactECharts option={mapOption} style={{ height: "520px" }} />
+            ) : (
+              <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground">
+                No hay ubicaciones para mostrar con los filtros actuales.
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
