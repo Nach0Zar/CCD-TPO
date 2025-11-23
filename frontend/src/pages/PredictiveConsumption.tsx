@@ -359,7 +359,7 @@ const PredictiveConsumption = () => {
             </DropdownMenu>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-3">
-            {activeAlgorithms.map((algorithm) => {
+            {algorithmOrder.map((algorithm) => {
               const total = totalByAlgorithm[algorithm] ?? 0;
               const isActive = selectedAlgorithms.includes(algorithm);
               return (
