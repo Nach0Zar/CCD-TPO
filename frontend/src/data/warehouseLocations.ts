@@ -1,29 +1,32 @@
-export type AlgorithmType = "MinibatchKMeans" | "KMeans" | "GMM";
+import type { AlgorithmType, PredictiveWarehouse } from "@/services/predictiveTypes";
 
-export interface WarehouseLocation {
-  warehouse_id: number;
-  latitude: number;
-  longitude: number;
-  customer_count: number;
-  algorithm: AlgorithmType;
-  note?: string;
-}
-
-export const warehouseLocations: WarehouseLocation[] = [
+export const warehouseLocations: PredictiveWarehouse[] = [
   {
     warehouse_id: 0,
     latitude: -22.63847482067538,
     longitude: -42.03269986663262,
     customer_count: 1013,
-    algorithm: "GMM",
+    density_ratio: 0.0102,
+    warehouse_size: "small",
+    estimated_delivery_improvement_pct: 11.53,
+    top_items: [
+      "3713f19c71c4be21ced80738e2fa49bc",
+      "99a4788cb24856965c36a24e339b6058",
+      "7a5df623713bbcb94a51ea4540748c12",
+      "9d9734db712d5ab6c3ff4c33700eb34c",
+      "a49969155f3a64afc931fd281444b2b6",
+    ],
+    algorithm: "gmm",
     note: "Cluster normal",
+    estimated_customer_growth_1y: 1374,
+    estimated_customer_growth_2y: 1864,
   },
   {
     warehouse_id: 1,
     latitude: -23.55052,
     longitude: -46.633308,
     customer_count: 1820,
-    algorithm: "KMeans",
+    algorithm: "kmeans",
     note: "Centro urbano",
   },
   {
@@ -31,7 +34,7 @@ export const warehouseLocations: WarehouseLocation[] = [
     latitude: -3.1190275,
     longitude: -60.0217314,
     customer_count: 760,
-    algorithm: "MinibatchKMeans",
+    algorithm: "minibatchkmeans",
     note: "Zona norte",
   },
   {
@@ -39,62 +42,64 @@ export const warehouseLocations: WarehouseLocation[] = [
     latitude: -12.9704,
     longitude: -38.5124,
     customer_count: 940,
-    algorithm: "KMeans",
+    algorithm: "kmeans",
   },
   {
     warehouse_id: 4,
     latitude: -8.0475622,
     longitude: -34.8769644,
     customer_count: 640,
-    algorithm: "MinibatchKMeans",
+    algorithm: "minibatchkmeans",
   },
   {
     warehouse_id: 5,
     latitude: -15.77972,
     longitude: -47.92972,
     customer_count: 1350,
-    algorithm: "GMM",
+    algorithm: "gmm",
   },
   {
     warehouse_id: 6,
     latitude: -30.033056,
     longitude: -51.23,
     customer_count: 520,
-    algorithm: "KMeans",
+    algorithm: "kmeans",
   },
   {
     warehouse_id: 7,
     latitude: -16.6869,
     longitude: -49.2648,
     customer_count: 480,
-    algorithm: "GMM",
+    algorithm: "gmm",
   },
   {
     warehouse_id: 8,
     latitude: -22.9068,
     longitude: -43.1729,
     customer_count: 2100,
-    algorithm: "MinibatchKMeans",
+    algorithm: "minibatchkmeans",
   },
   {
     warehouse_id: 9,
     latitude: -19.9167,
     longitude: -43.9345,
     customer_count: 870,
-    algorithm: "KMeans",
+    algorithm: "kmeans",
   },
   {
     warehouse_id: 10,
     latitude: -2.533,
     longitude: -44.3028,
     customer_count: 420,
-    algorithm: "GMM",
+    algorithm: "gmm",
   },
   {
     warehouse_id: 11,
     latitude: -25.4284,
     longitude: -49.2733,
     customer_count: 690,
-    algorithm: "MinibatchKMeans",
+    algorithm: "minibatchkmeans",
   },
 ];
+
+export const algorithmOrder: AlgorithmType[] = ["gmm", "kmeans", "minibatchkmeans"];
