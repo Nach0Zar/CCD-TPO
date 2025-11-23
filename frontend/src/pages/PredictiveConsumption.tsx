@@ -15,7 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchWarehousePredictions } from "@/services/predictiveService";
 import type { AlgorithmType, PredictiveWarehouse } from "@/services/predictiveTypes";
 import { algorithmOrder } from "@/data/warehouseLocations";
-import brazilGeoJson from "@/data/brazilGeoJson";
+import brazilGeoJson from "@/data/brazil_geo.json";
 
 const algorithmStyles: Record<AlgorithmType, { label: string; color: string }> = {
   kmeans: { label: "KMeans", color: "#2563eb" },
@@ -97,7 +97,7 @@ const PredictiveConsumption = () => {
         roam: true,
         zoom: 0.95,
         itemStyle: {
-          areaColor: "hsl(var(--muted))",
+          areaColor: "lightyellow",
           borderColor: "hsl(var(--border))",
           borderWidth: 1.4,
         },
