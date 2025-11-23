@@ -5,6 +5,9 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Ensure Vite always reads environment variables from the frontend folder,
+  // even when running commands from the repository root with --prefix.
+  envDir: path.resolve(__dirname),
   server: {
     host: "::",
     port: 8080,
