@@ -274,7 +274,7 @@ const PredictiveConsumption = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-72">
-                {activeAlgorithms.map((algorithm) => (
+                {algorithmOrder.map((algorithm) => (
                   <DropdownMenuCheckboxItem
                     key={algorithm}
                     checked={selectedAlgorithms.includes(algorithm)}
