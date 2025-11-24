@@ -1,3 +1,4 @@
+import BrazilMapLayers from "@/components/BrazilMapLayers";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ReactECharts from "echarts-for-react";
 
@@ -176,6 +177,8 @@ const HistoricConsumption = () => {
         </div>
 
         <div className="grid gap-6 mb-6">
+
+          <BrazilMapLayers />
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Tendencias Temporales</CardTitle>
