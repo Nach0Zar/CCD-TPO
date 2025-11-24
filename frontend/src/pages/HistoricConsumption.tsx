@@ -1,7 +1,182 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useMemo, useState } from "react";
 import ReactECharts from "echarts-for-react";
+import * as echarts from "echarts";
+import { Flame, MapPin, Store, Users, Filter } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
+import brazilGeoJson from "@/data/brazil_geo.json";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { fetchCustomerHeatmap, fetchCustomerSellerMap } from "@/services/mapService";
 
 const HistoricConsumption = () => {
+  const [selectedLayers, setSelectedLayers] = useState({
+    heatmap: true,
+    customers: true,
+    sellers: false,
+  });
+
+  useEffect(() => {
+    if (!echarts.getMap("brazil")) {
+      echarts.registerMap("brazil", brazilGeoJson as any);
+    }
+  }, []);
+
+  const {
+    data: customerHeatmap,
+    isLoading: isLoadingHeatmap,
+    isError: isHeatmapError,
+  } = useQuery({
+    queryKey: ["customer-heatmap"],
+    queryFn: fetchCustomerHeatmap,
+  });
+
+  const {
+    data: customerSellerMap,
+    isLoading: isLoadingCustomerSeller,
+    isError: isCustomerSellerError,
+  } = useQuery({
+    queryKey: ["customer-seller-map"],
+    queryFn: fetchCustomerSellerMap,
+  });
+
+  const activeLayers = useMemo(
+    () =>
+      [
+        selectedLayers.heatmap && "heatmap",
+        selectedLayers.customers && "customers",
+        selectedLayers.sellers && "sellers",
+      ].filter(Boolean) as string[],
+    [selectedLayers],
+  );
+
+  const customerCount = customerSellerMap?.customers?.length ?? 0;
+  const sellerCount = customerSellerMap?.sellers?.length ?? 0;
+
+  const mapOption = useMemo(() => {
+    const baseSeries: echarts.EChartsOption["series"] = [
+      {
+        type: "map",
+        map: "brazil",
+        roam: true,
+        itemStyle: {
+          areaColor: "lightyellow",
+          borderColor: "hsl(var(--border))",
+          borderWidth: 1.4,
+        },
+        emphasis: {
+          itemStyle: {
+            areaColor: "hsl(var(--muted-foreground)/0.15)",
+          },
+        },
+        select: { disabled: true },
+        data: [],
+      },
+    ];
+
+    const series: echarts.EChartsOption["series"] = [...baseSeries];
+
+    if (selectedLayers.heatmap && customerHeatmap?.points?.length) {
+      series.push({
+        name: "Densidad de clientes",
+        type: "heatmap",
+        coordinateSystem: "geo",
+        data: customerHeatmap.points.map((point) => [point.lon, point.lat, point.weight]),
+        pointSize: 12,
+        blurSize: 20,
+      });
+    }
+
+    if (selectedLayers.customers && customerSellerMap?.customers?.length) {
+      series.push({
+        name: "Clientes",
+        type: "scatter",
+        coordinateSystem: "geo",
+        data: customerSellerMap.customers.map((point) => ({ value: [point.lon, point.lat] })),
+        symbolSize: 10,
+        itemStyle: {
+          color: "#0ea5e9",
+          shadowBlur: 6,
+          shadowColor: "rgba(14, 165, 233, 0.35)",
+        },
+        emphasis: { itemStyle: { borderColor: "#0ea5e9", borderWidth: 1 } },
+      });
+    }
+
+    if (selectedLayers.sellers && customerSellerMap?.sellers?.length) {
+      series.push({
+        name: "Sellers",
+        type: "scatter",
+        coordinateSystem: "geo",
+        data: customerSellerMap.sellers.map((point) => ({ value: [point.lon, point.lat] })),
+        symbolSize: 10,
+        itemStyle: {
+          color: "#f97316",
+          shadowBlur: 6,
+          shadowColor: "rgba(249, 115, 22, 0.35)",
+        },
+        emphasis: { itemStyle: { borderColor: "#f97316", borderWidth: 1 } },
+      });
+    }
+
+    const hasHeatmap = selectedLayers.heatmap && customerHeatmap?.points?.length;
+
+    return {
+      backgroundColor: "transparent",
+      tooltip: {
+        trigger: "item",
+        formatter: (params: any) => {
+          if (params.seriesType === "heatmap") {
+            return `Punto con densidad de clientes: ${params.data?.[2] ?? 0}`;
+          }
+
+          if (params.seriesName === "Clientes") {
+            return "Cliente geolocalizado";
+          }
+
+          if (params.seriesName === "Sellers") {
+            return "Seller geolocalizado";
+          }
+
+          return params.name || "Brasil";
+        },
+      },
+      geo: {
+        map: "brazil",
+        roam: true,
+        zoom: 0.95,
+        itemStyle: {
+          areaColor: "lightyellow",
+          borderColor: "hsl(var(--border))",
+          borderWidth: 1.4,
+        },
+        emphasis: {
+          itemStyle: { areaColor: "hsl(var(--muted-foreground)/0.15)" },
+        },
+      },
+      visualMap: hasHeatmap
+        ? {
+            min: 0,
+            max: Math.max(...customerHeatmap.points.map((point) => point.weight), 10),
+            orient: "horizontal",
+            left: "center",
+            bottom: 20,
+            textStyle: { color: "hsl(var(--muted-foreground))" },
+            inRange: {
+              color: ["#e0f2fe", "#0ea5e9"],
+            },
+          }
+        : undefined,
+      series,
+    } as echarts.EChartsOption;
+  }, [customerHeatmap, customerSellerMap, selectedLayers]);
+
   // Sample historical data
   const lineChartOption = {
     title: {
@@ -176,6 +351,114 @@ const HistoricConsumption = () => {
         </div>
 
         <div className="grid gap-6 mb-6">
+          <Card className="shadow-lg">
+            <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-1">
+                <CardTitle>Mapa de calor y puntos georreferenciados</CardTitle>
+                <CardDescription>
+                  Visualiza la intensidad de clientes y activa los puntos de clientes o sellers según necesidad.
+                </CardDescription>
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <Filter className="h-4 w-4" /> Capas del mapa
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuCheckboxItem
+                    checked={selectedLayers.heatmap}
+                    onCheckedChange={(checked) =>
+                      setSelectedLayers((prev) => ({ ...prev, heatmap: Boolean(checked) }))
+                    }
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <span>Zona de calor</span>
+                      <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Flame className="h-4 w-4 text-orange-500" />
+                        {customerHeatmap?.points?.length ?? 0}
+                      </span>
+                    </div>
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedLayers.customers}
+                    onCheckedChange={(checked) =>
+                      setSelectedLayers((prev) => ({ ...prev, customers: Boolean(checked) }))
+                    }
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <span>Puntos de clientes</span>
+                      <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Users className="h-4 w-4 text-sky-500" />
+                        {customerCount}
+                      </span>
+                    </div>
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedLayers.sellers}
+                    onCheckedChange={(checked) =>
+                      setSelectedLayers((prev) => ({ ...prev, sellers: Boolean(checked) }))
+                    }
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <span>Puntos de sellers</span>
+                      <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Store className="h-4 w-4 text-orange-500" />
+                        {sellerCount}
+                      </span>
+                    </div>
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="flex items-center gap-2 rounded-lg border p-3">
+                  <Flame className={`h-4 w-4 ${selectedLayers.heatmap ? "text-orange-500" : "text-muted-foreground"}`} />
+                  <div>
+                    <p className="text-sm font-semibold">Mapa de calor</p>
+                    <p className="text-xs text-muted-foreground">{customerHeatmap?.points?.length ?? 0} puntos</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 rounded-lg border p-3">
+                  <Users className={`h-4 w-4 ${selectedLayers.customers ? "text-sky-500" : "text-muted-foreground"}`} />
+                  <div>
+                    <p className="text-sm font-semibold">Clientes</p>
+                    <p className="text-xs text-muted-foreground">{customerCount} coordenadas</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 rounded-lg border p-3">
+                  <Store className={`h-4 w-4 ${selectedLayers.sellers ? "text-orange-500" : "text-muted-foreground"}`} />
+                  <div>
+                    <p className="text-sm font-semibold">Sellers</p>
+                    <p className="text-xs text-muted-foreground">{sellerCount} coordenadas</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                {activeLayers.length ? (
+                  <span>Capas activas: {activeLayers.join(", ")}</span>
+                ) : (
+                  <span>Sin capas seleccionadas, se muestra únicamente el mapa base de Brasil.</span>
+                )}
+              </div>
+
+              {isLoadingHeatmap || isLoadingCustomerSeller ? (
+                <div className="text-sm text-muted-foreground">Cargando tráfico geográfico...</div>
+              ) : isHeatmapError || isCustomerSellerError ? (
+                <div className="text-sm text-red-600">
+                  No se pudo obtener la información del mapa. Se muestran datos mock para continuar con las pruebas.
+                </div>
+              ) : null}
+
+              <ReactECharts option={mapOption} style={{ height: "520px" }} />
+            </CardContent>
+          </Card>
+
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Tendencias Temporales</CardTitle>
