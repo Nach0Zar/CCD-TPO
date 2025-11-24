@@ -1,5 +1,6 @@
 import BrazilMapLayers from "@/components/BrazilMapLayers";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import GeoEconomicPanel from "@/modules/historical/GeoEconomicPanel";
 import HistoricalConsumptionPanel from "@/modules/historical/HistoricalConsumptionPanel";
 import TimeSeriesChart from "@/modules/historical/TimeSeriesChart";
 import ReactECharts from "echarts-for-react";
@@ -181,6 +182,7 @@ const HistoricConsumption = () => {
         <div className="grid gap-6 mb-6">
 
           <HistoricalConsumptionPanel />
+          <GeoEconomicPanel />
           <BrazilMapLayers />
           <Card className="shadow-lg">
             <CardHeader>
