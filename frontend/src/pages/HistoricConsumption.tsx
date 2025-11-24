@@ -62,18 +62,18 @@ const HistoricConsumption = () => {
     value?: [number, number, number];
   };
 
-  const mapOption = useMemo<echarts.EChartsOption | null>(() => {
+  const mapOption = useMemo<echarts.EChartsOption>(() => {
     const hasHeatmap = selectedLayers.heatmap && !!heatmapData?.points.length;
     const hasCustomers = selectedLayers.customers && !!customerSellerData?.customers.length;
     const hasSellers = selectedLayers.sellers && !!customerSellerData?.sellers.length;
 
-    if (!hasHeatmap && !hasCustomers && !hasSellers) return null;
-
     const maxWeight = hasHeatmap ? Math.max(...(heatmapData?.points.map((point) => point.weight) ?? [0])) : 0;
 
     const series: echarts.SeriesOption[] = [];
+    let heatmapSeriesIndex: number | null = null;
 
     if (hasHeatmap && heatmapData) {
+      heatmapSeriesIndex = series.length;
       series.push({
         name: "Concentración de clientes",
         type: "heatmap",
@@ -92,7 +92,12 @@ const HistoricConsumption = () => {
         coordinateSystem: "geo",
         symbol: "circle",
         symbolSize: 9,
-        itemStyle: { color: "#2563eb", shadowBlur: 6, shadowColor: "rgba(37, 99, 235, 0.25)" },
+        itemStyle: {
+          color: "#2563eb",
+          shadowBlur: 6,
+          shadowColor: "rgba(37, 99, 235, 0.25)",
+        },
+        emphasis: { itemStyle: { color: "#2563eb" } },
         data: customerSellerData.customers.map((point, index) => ({
           name: `Cliente #${index + 1}`,
           value: [point.lon, point.lat, 1],
@@ -108,12 +113,29 @@ const HistoricConsumption = () => {
         coordinateSystem: "geo",
         symbol: "diamond",
         symbolSize: 10,
-        itemStyle: { color: "#f59e0b", shadowBlur: 6, shadowColor: "rgba(245, 158, 11, 0.25)" },
+        itemStyle: {
+          color: "#f59e0b",
+          shadowBlur: 6,
+          shadowColor: "rgba(245, 158, 11, 0.25)",
+        },
+        emphasis: { itemStyle: { color: "#f59e0b" } },
         data: customerSellerData.sellers.map((point, index) => ({
           name: `Seller #${index + 1}`,
           value: [point.lon, point.lat, 1],
           category: "seller",
         })),
+      });
+    }
+
+    if (!hasHeatmap && !hasCustomers && !hasSellers) {
+      series.push({
+        name: "Mapa base",
+        type: "map",
+        map: "brazil",
+        geoIndex: 0,
+        data: [],
+        silent: true,
+        tooltip: { show: false },
       });
     }
 
@@ -126,15 +148,7 @@ const HistoricConsumption = () => {
           if (params.seriesType === "heatmap") {
             const [lon, lat, value] = params.value || [];
             return `
-              <div style="min-width:180px;">
-                <div style="font-weight:600;margin-bottom:6px;">Zona con clientes</div>
-                <div style="font-size:12px;line-height:1.5;">
-                  <div>Lat: ${lat?.toFixed?.(2) ?? lat}</div>
-                  <div>Lon: ${lon?.toFixed?.(2) ?? lon}</div>
-                  <div>Clientes estimados: ${value}</div>
-                </div>
-              </div>
-            `;
+              <div style="min-width:180px;">                <div style="font-weight:600;margin-bottom:6px;">Zona con clientes</div>                <div style="font-size:12px;line-height:1.5;">                  <div>Lat: ${lat?.toFixed?.(2) ?? lat}</div>                  <div>Lon: ${lon?.toFixed?.(2) ?? lon}</div>                  <div>Clientes estimados: ${value}</div>                </div>              </div>            `;
           }
 
           const isCustomer = params.data?.category === "customer";
@@ -143,40 +157,32 @@ const HistoricConsumption = () => {
           const [lon, lat] = params.value || [];
 
           return `
-            <div style="min-width:180px;">
-              <div style="display:flex;align-items:center;gap:8px;">
-                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${iconColor}"></span>
-                <strong>${label} ${params.dataIndex + 1}</strong>
-              </div>
-              <div style="margin-top:6px;font-size:12px;line-height:1.5;">
-                <div>Lat: ${lat?.toFixed?.(2) ?? lat}</div>
-                <div>Lon: ${lon?.toFixed?.(2) ?? lon}</div>
-              </div>
-            </div>
-          `;
+            <div style="min-width:180px;">              <div style="display:flex;align-items:center;gap:8px;">                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${iconColor}"></span>                <strong>${label} ${params.dataIndex + 1}</strong>              </div>              <div style="margin-top:6px;font-size:12px;line-height:1.5;">                <div>Lat: ${lat?.toFixed?.(2) ?? lat}</div>                <div>Lon: ${lon?.toFixed?.(2) ?? lon}</div>              </div>            </div>          `;
         },
       },
-      visualMap: hasHeatmap
-        ? {
-            min: 0,
-            max: maxWeight || 10,
-            calculable: true,
-            orient: "horizontal",
-            left: "center",
-            bottom: 18,
-            text: ["Mayor densidad", "Menor"],
-            textStyle: { color: "hsl(var(--muted-foreground))" },
-            inRange: {
-              color: ["#e0f2fe", "#38bdf8", "#0ea5e9", "#0369a1"],
-            },
-            itemWidth: 12,
-            itemHeight: 160,
-          }
-        : undefined,
+      visualMap:
+        hasHeatmap && heatmapSeriesIndex !== null
+          ? {
+              min: 0,
+              max: maxWeight || 10,
+              calculable: true,
+              orient: "horizontal",
+              left: "center",
+              bottom: 60,
+              text: ["Mayor densidad", "Menor"],
+              textStyle: { color: "hsl(var(--muted-foreground))" },
+              inRange: {
+                color: ["#e0f2fe", "#38bdf8", "#0ea5e9", "#0369a1"],
+              },
+              itemWidth: 180,
+              itemHeight: 12,
+              seriesIndex: [heatmapSeriesIndex],
+            }
+          : undefined,
       legend: {
         data: series.map((item) => item.name as string),
         icon: "circle",
-        bottom: hasHeatmap ? 28 : 8,
+        bottom: 16,
         textStyle: { color: "hsl(var(--muted-foreground))" },
         selectedMode: false,
       },
@@ -474,7 +480,7 @@ const HistoricConsumption = () => {
               ) : isHeatmapError || isCustomerSellerError ? (
                 <div className="text-sm text-red-600">No se pudo obtener la información geográfica. Intenta nuevamente más tarde.</div>
               ) : mapOption ? (
-                <ReactECharts option={mapOption} style={{ height: "520px" }} />
+                <ReactECharts option={mapOption} style={{ height: "520px" }} notMerge />
               ) : (
                 <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground">
                   No hay capas activas o datos disponibles para mostrar en el mapa.
