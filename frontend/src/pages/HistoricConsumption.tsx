@@ -165,18 +165,21 @@ const HistoricConsumption = () => {
           ? {
               min: 0,
               max: maxWeight || 10,
-              calculable: true,
+              show: true,
               orient: "horizontal",
               left: "center",
-              bottom: 60,
+              bottom: 20,
               text: ["Mayor densidad", "Menor"],
+              textGap: 12,
               textStyle: { color: "hsl(var(--muted-foreground))" },
+              calculable: false,
               inRange: {
                 color: ["#e0f2fe", "#38bdf8", "#0ea5e9", "#0369a1"],
               },
-              itemWidth: 180,
-              itemHeight: 12,
+              itemWidth: 220,
+              itemHeight: 14,
               seriesIndex: [heatmapSeriesIndex],
+              padding: [10, 14],
             }
           : undefined,
       legend: {
