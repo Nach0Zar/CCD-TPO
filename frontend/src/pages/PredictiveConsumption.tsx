@@ -169,10 +169,10 @@ const PredictiveConsumption = () => {
 
     const categories = growthStats.categories.map((algorithm) => algorithmStyles[algorithm].label);
     const mean1y = growthStats.categories.map(
-      (algorithm) => growthStats.byAlgorithm[algorithm]?.growth1y?.mean ?? 0,
+      (algorithm) => Math.round(growthStats.byAlgorithm[algorithm]?.growth1y?.mean) ?? 0,
     );
     const mean2y = growthStats.categories.map(
-      (algorithm) => growthStats.byAlgorithm[algorithm]?.growth2y?.mean ?? 0,
+      (algorithm) => Math.round(growthStats.byAlgorithm[algorithm]?.growth2y?.mean) ?? 0,
     );
 
     if (!mean1y.some((value) => value > 0) && !mean2y.some((value) => value > 0)) return null;
@@ -202,7 +202,7 @@ const PredictiveConsumption = () => {
       xAxis: { type: "category", data: categories, axisLabel: { rotate: 10 } },
       yAxis: {
         type: "value",
-        name: "Clientes proyectados (media)",
+        name: "Clientes proyectados \n(media)",
         splitLine: { lineStyle: { type: "dashed" } },
       },
       series: [
