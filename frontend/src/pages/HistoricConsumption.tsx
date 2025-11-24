@@ -1,7 +1,105 @@
+import { useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ReactECharts from "echarts-for-react";
+import * as echarts from "echarts";
+import { Loader2, Map } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
+import brazilGeoJson from "@/data/brazil_geo.json";
+import { fetchCustomerHeatmap } from "@/services/heatmapService";
+import type { CustomerHeatmapData } from "@/services/heatmapTypes";
 
 const HistoricConsumption = () => {
+  const {
+    data: heatmapData,
+    isLoading: isHeatmapLoading,
+    isError: isHeatmapError,
+  } = useQuery<CustomerHeatmapData>({
+    queryKey: ["customer-heatmap"],
+    queryFn: fetchCustomerHeatmap,
+  });
+
+  useEffect(() => {
+    if (!echarts.getMap("brazil")) {
+      echarts.registerMap("brazil", brazilGeoJson);
+    }
+  }, []);
+
+  const totalHeatmapCustomers = useMemo(
+    () => heatmapData?.points.reduce((total, point) => total + point.weight, 0) ?? 0,
+    [heatmapData],
+  );
+
+  type HeatmapFormatterParams = { value?: [number, number, number] };
+
+  const heatmapOption = useMemo<echarts.EChartsOption | null>(() => {
+    if (!heatmapData?.points.length) return null;
+
+    const maxWeight = Math.max(...heatmapData.points.map((point) => point.weight));
+
+    return {
+      backgroundColor: "transparent",
+      tooltip: {
+        trigger: "item",
+        borderColor: "hsl(var(--border))",
+        formatter: (params: HeatmapFormatterParams) => {
+          const [lon, lat, value] = params.value || [];
+          return `
+            <div style="min-width:180px;">
+              <div style="font-weight:600;margin-bottom:6px;">Zona con clientes</div>
+              <div style="font-size:12px;line-height:1.5;">
+                <div>Lat: ${lat?.toFixed?.(2) ?? lat}</div>
+                <div>Lon: ${lon?.toFixed?.(2) ?? lon}</div>
+                <div>Clientes estimados: ${value}</div>
+              </div>
+            </div>
+          `;
+        },
+      },
+      visualMap: {
+        min: 0,
+        max: maxWeight || 10,
+        calculable: true,
+        orient: "horizontal",
+        left: "center",
+        bottom: 18,
+        text: ["Mayor densidad", "Menor"],
+        textStyle: { color: "hsl(var(--muted-foreground))" },
+        inRange: {
+          color: ["#e0f2fe", "#38bdf8", "#0ea5e9", "#0369a1"],
+        },
+        itemWidth: 12,
+        itemHeight: 160,
+      },
+      geo: {
+        map: "brazil",
+        roam: true,
+        zoom: 0.95,
+        itemStyle: {
+          areaColor: "lightyellow",
+          borderColor: "hsl(var(--border))",
+          borderWidth: 1.4,
+        },
+        emphasis: {
+          itemStyle: {
+            areaColor: "hsl(var(--muted-foreground)/0.15)",
+          },
+        },
+      },
+      series: [
+        {
+          name: "Concentración de clientes",
+          type: "heatmap",
+          coordinateSystem: "geo",
+          data: heatmapData.points.map((point) => [point.lon, point.lat, point.weight]),
+          pointSize: 22,
+          blurSize: 30,
+          progressive: 500,
+        },
+      ],
+    } as echarts.EChartsOption;
+  }, [heatmapData]);
+
   // Sample historical data
   const lineChartOption = {
     title: {
@@ -185,6 +283,41 @@ const HistoricConsumption = () => {
             </CardHeader>
             <CardContent>
               <ReactECharts option={lineChartOption} style={{ height: "400px" }} />
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle>Mapa de calor de clientes</CardTitle>
+              <CardDescription>
+                Concentración histórica de clientes por coordenada geográfica en Brasil.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Map className="h-4 w-4" />
+                {heatmapData?.points.length ? (
+                  <span>
+                    {`Mostrando ${heatmapData.points.length} celdas activas y ${totalHeatmapCustomers.toLocaleString()} clientes acumulados.`}
+                  </span>
+                ) : (
+                  <span>Esperando datos de densidad de clientes.</span>
+                )}
+              </div>
+
+              {isHeatmapLoading ? (
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Cargando zonas de calor...
+                </div>
+              ) : isHeatmapError ? (
+                <div className="text-sm text-red-600">No se pudo obtener la información geográfica. Intenta nuevamente más tarde.</div>
+              ) : heatmapOption ? (
+                <ReactECharts option={heatmapOption} style={{ height: "520px" }} />
+              ) : (
+                <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground">
+                  No hay datos de mapa de calor disponibles por el momento.
+                </div>
+              )}
             </CardContent>
           </Card>
 
