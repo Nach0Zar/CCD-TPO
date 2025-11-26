@@ -154,7 +154,7 @@ const PredictiveConsumption = () => {
       };
 
       const mean = sorted.reduce((sum, value) => sum + value, 0) / sorted.length;
-      return { box: [sorted[0], percentile(0.25), percentile(0.5), percentile(0.75), sorted[sorted.length - 1)], mean };
+      return { box: [sorted[0], percentile(0.25), percentile(0.5), percentile(0.75), sorted[(sorted.length - 1)], mean ]};
     };
 
     const byAlgorithm = Object.entries(accumulator).reduce(
