@@ -17,6 +17,15 @@ import type { AlgorithmType, PredictiveWarehouse } from "@/services/predictiveTy
 import { algorithmOrder } from "@/data/warehouseLocations";
 import brazilGeoJson from "@/data/brazil_geo.json";
 
+const warehouseSizes = ["small", "medium", "large"] as const;
+type WarehouseSize = (typeof warehouseSizes)[number];
+
+const warehouseSizeStyles: Record<WarehouseSize, { label: string; colors: [string, string] }> = {
+  small: { label: "Small", colors: ["#0ea5e9", "#7dd3fc"] },
+  medium: { label: "Medium", colors: ["#f97316", "#fdba74"] },
+  large: { label: "Large", colors: ["#22c55e", "#86efac"] },
+};
+
 const algorithmStyles: Record<AlgorithmType, { label: string; color: string }> = {
   kmeans: { label: "KMeans", color: "#2563eb" },
   gmm: { label: "GMM", color: "#22c55e" },
@@ -103,6 +112,76 @@ const PredictiveConsumption = () => {
     return { byAlgorithm, categories };
   }, [activeAlgorithms, filteredLocations]);
 
+  const sizeGrowthStats = useMemo(() => {
+    const accumulator = activeAlgorithms.reduce(
+      (acc, algorithm) => ({
+        ...acc,
+        [algorithm]: warehouseSizes.reduce(
+          (sizeAcc, size) => ({
+            ...sizeAcc,
+            [size]: { count: 0, growth1y: [] as number[], growth2y: [] as number[] },
+          }),
+          {} as Record<WarehouseSize, { count: number; growth1y: number[]; growth2y: number[] }>,
+        ),
+      }),
+      {} as Record<AlgorithmType, Record<WarehouseSize, { count: number; growth1y: number[]; growth2y: number[] }>>,
+    );
+
+    filteredLocations.forEach((location) => {
+      const size = (location.warehouse_size?.toLowerCase() || "") as WarehouseSize;
+      if (!warehouseSizes.includes(size)) return;
+
+      const stats = accumulator[location.algorithm]?.[size];
+      if (!stats) return;
+
+      stats.count += 1;
+      if (typeof location.estimated_customer_growth_1y === "number") {
+        stats.growth1y.push(location.estimated_customer_growth_1y);
+      }
+      if (typeof location.estimated_customer_growth_2y === "number") {
+        stats.growth2y.push(location.estimated_customer_growth_2y);
+      }
+    });
+
+    const computeBoxData = (values: number[]) => {
+      if (!values.length) return null;
+      const sorted = [...values].sort((a, b) => a - b);
+      const percentile = (p: number) => {
+        const position = (sorted.length - 1) * p;
+        const base = Math.floor(position);
+        const rest = position - base;
+        return sorted[base] + rest * (sorted[base + 1] - sorted[base] || 0);
+      };
+
+      const mean = sorted.reduce((sum, value) => sum + value, 0) / sorted.length;
+      return { box: [sorted[0], percentile(0.25), percentile(0.5), percentile(0.75), sorted[(sorted.length - 1)], mean ]};
+    };
+
+    const byAlgorithm = Object.entries(accumulator).reduce(
+      (acc, [algorithm, sizes]) => ({
+        ...acc,
+        [algorithm]: Object.entries(sizes).reduce(
+          (sizeAcc, [size, values]) => ({
+            ...sizeAcc,
+            [size]: {
+              count: values.count,
+              growth1y: computeBoxData(values.growth1y),
+              growth2y: computeBoxData(values.growth2y),
+            },
+          }),
+          {} as Record<WarehouseSize, { count: number; growth1y: { box: number[]; mean: number } | null; growth2y: { box: number[]; mean: number } | null }>,
+        ),
+      }),
+      {} as Record<AlgorithmType, Record<WarehouseSize, { count: number; growth1y: { box: number[]; mean: number } | null; growth2y: { box: number[]; mean: number } | null }>>,
+    );
+
+    const categories = activeAlgorithms.filter((algorithm) =>
+      warehouseSizes.some((size) => byAlgorithm[algorithm]?.[size]?.count),
+    );
+
+    return { byAlgorithm, categories };
+  }, [activeAlgorithms, filteredLocations]);
+
   const boxplotOption = useMemo(() => {
     if (!growthStats.categories.length) return null;
 
@@ -159,10 +238,79 @@ const PredictiveConsumption = () => {
       },
       series: [
         seriesFactory("Crecimiento 1 año", "growth1y", "#0ea5e9"),
-        seriesFactory("Crecimiento 2 años", "growth2y", "#8b5cf6"),
-      ],
+      seriesFactory("Crecimiento 2 años", "growth2y", "#8b5cf6"),
+    ],
     } as echarts.EChartsOption;
   }, [growthStats]);
+
+  const sizeBoxplotOption = useMemo(() => {
+    if (!sizeGrowthStats.categories.length) return null;
+
+    const seriesFactory = (
+      label: string,
+      key: "growth1y" | "growth2y",
+      size: WarehouseSize,
+      color: string,
+    ): echarts.EChartsOption["series"] => ({
+      name: `${label} - ${warehouseSizeStyles[size].label}`,
+      type: "boxplot",
+      itemStyle: { color, borderColor: color },
+      emphasis: { itemStyle: { color, borderColor: color, opacity: 0.7 } },
+      data: sizeGrowthStats.categories.map(
+        (algorithm) => sizeGrowthStats.byAlgorithm[algorithm]?.[size]?.[key]?.box || null,
+      ),
+      tooltip: {
+        formatter: (params: any) => {
+          const algorithm = sizeGrowthStats.categories[params.dataIndex];
+          const stat = sizeGrowthStats.byAlgorithm[algorithm]?.[size]?.[key];
+          const mean = stat?.mean;
+          const yearLabel = key === "growth1y" ? "Crecimiento 1 año" : "Crecimiento 2 años";
+          return `
+            <div style="min-width:220px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color}"></span>
+                <strong>${algorithmStyles[algorithm].label}</strong>
+              </div>
+              <div style="margin-top:6px;font-size:12px;line-height:1.5;">
+                <div>${yearLabel}</div>
+                <div>Tamaño: ${warehouseSizeStyles[size].label}</div>
+                ${mean ? `<div>Media: ${mean.toFixed(0)}</div>` : ""}
+                <div>Warehouses analizados: ${sizeGrowthStats.byAlgorithm[algorithm]?.[size]?.count ?? 0}</div>
+              </div>
+            </div>
+          `;
+        },
+      },
+    });
+
+    return {
+      tooltip: { trigger: "item", axisPointer: { type: "shadow" } },
+      legend: {
+        data: warehouseSizes.flatMap((size) => [
+          `Crecimiento 1 año - ${warehouseSizeStyles[size].label}`,
+          `Crecimiento 2 años - ${warehouseSizeStyles[size].label}`,
+        ]),
+        icon: "circle",
+        bottom: 0,
+        type: "scroll",
+      },
+      grid: { left: "3%", right: "4%", bottom: "20%", containLabel: true },
+      xAxis: {
+        type: "category",
+        data: sizeGrowthStats.categories.map((algorithm) => algorithmStyles[algorithm].label),
+        axisLabel: { rotate: 10 },
+      },
+      yAxis: {
+        type: "value",
+        name: "Clientes proyectados",
+        splitLine: { lineStyle: { type: "dashed" } },
+      },
+      series: warehouseSizes.flatMap((size) => [
+        seriesFactory("Crecimiento 1 año", "growth1y", size, warehouseSizeStyles[size].colors[0]),
+        seriesFactory("Crecimiento 2 años", "growth2y", size, warehouseSizeStyles[size].colors[1]),
+      ]),
+    } as echarts.EChartsOption;
+  }, [sizeGrowthStats]);
 
   const meanGrowthOption = useMemo(() => {
     if (!growthStats.categories.length) return null;
@@ -439,6 +587,30 @@ const PredictiveConsumption = () => {
             ) : (
               <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground">
                 No hay datos de crecimiento disponibles para los filtros actuales.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Crecimiento por algoritmo y tamaño de almacén</CardTitle>
+            <CardDescription>
+              Boxplot segmentado por tamaño (Small, Medium, Large) y algoritmo para comparar proyecciones de 1 y 2 años.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Calculando métricas por tamaño de almacén...
+              </div>
+            ) : isError ? (
+              <div className="text-sm text-red-600">No se pudo obtener la información. Intenta nuevamente más tarde.</div>
+            ) : sizeGrowthStats.categories.length && sizeBoxplotOption ? (
+              <ReactECharts option={sizeBoxplotOption} style={{ height: "460px" }} />
+            ) : (
+              <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground">
+                No hay datos de crecimiento por tamaño de almacén para los filtros actuales.
               </div>
             )}
           </CardContent>
