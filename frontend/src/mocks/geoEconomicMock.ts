@@ -1,54 +1,16 @@
 import type { MacroCorrelationData, StateConsumptionData } from "@/services/geoEconomicService";
 
+import correlation from '@/mocks/Correlograma_con_indicadores_economic.json'
+import cosumoXestado from '@/mocks/CONSUMO_POR_ESTADO.json'
+
 export const mockStateConsumptionData: StateConsumptionData = {
-  states: [
-    { state: "AC", totalSales: 95000, ordersCount: 620 },
-    { state: "AL", totalSales: 132000, ordersCount: 840 },
-    { state: "AP", totalSales: 78000, ordersCount: 510 },
-    { state: "AM", totalSales: 185000, ordersCount: 1180 },
-    { state: "BA", totalSales: 260000, ordersCount: 1650 },
-    { state: "CE", totalSales: 210000, ordersCount: 1420 },
-    { state: "DF", totalSales: 195000, ordersCount: 1230 },
-    { state: "ES", totalSales: 174000, ordersCount: 1110 },
-    { state: "GO", totalSales: 205000, ordersCount: 1330 },
-    { state: "MA", totalSales: 142000, ordersCount: 930 },
-    { state: "MT", totalSales: 160000, ordersCount: 1020 },
-    { state: "MS", totalSales: 158000, ordersCount: 980 },
-    { state: "MG", totalSales: 410000, ordersCount: 2650 },
-    { state: "PA", totalSales: 188000, ordersCount: 1210 },
-    { state: "PB", totalSales: 146000, ordersCount: 940 },
-    { state: "PR", totalSales: 360000, ordersCount: 2300 },
-    { state: "PE", totalSales: 255000, ordersCount: 1670 },
-    { state: "PI", totalSales: 123000, ordersCount: 810 },
-    { state: "RJ", totalSales: 520000, ordersCount: 3120 },
-    { state: "RN", totalSales: 150000, ordersCount: 970 },
-    { state: "RS", totalSales: 335000, ordersCount: 2140 },
-    { state: "RO", totalSales: 105000, ordersCount: 680 },
-    { state: "RR", totalSales: 72000, ordersCount: 460 },
-    { state: "SC", totalSales: 298000, ordersCount: 1880 },
-    { state: "SP", totalSales: 920000, ordersCount: 5600 },
-    { state: "SE", totalSales: 118000, ordersCount: 760 },
-    { state: "TO", totalSales: 97000, ordersCount: 620 },
-  ],
+  states: cosumoXestado.states,
 };
 
 export const mockMacroCorrelationInflation: MacroCorrelationData = {
   indicator: "inflation",
   unit: "%",
-  points: [
-    { date: "2023-01", indicatorValue: 4.6, salesValue: 155000 },
-    { date: "2023-02", indicatorValue: 4.9, salesValue: 150500 },
-    { date: "2023-03", indicatorValue: 5.2, salesValue: 149000 },
-    { date: "2023-04", indicatorValue: 4.8, salesValue: 152000 },
-    { date: "2023-05", indicatorValue: 4.4, salesValue: 157500 },
-    { date: "2023-06", indicatorValue: 4.2, salesValue: 160000 },
-    { date: "2023-07", indicatorValue: 4.1, salesValue: 162500 },
-    { date: "2023-08", indicatorValue: 4.3, salesValue: 161000 },
-    { date: "2023-09", indicatorValue: 4.7, salesValue: 158000 },
-    { date: "2023-10", indicatorValue: 5.1, salesValue: 155500 },
-    { date: "2023-11", indicatorValue: 5.4, salesValue: 153000 },
-    { date: "2023-12", indicatorValue: 5.0, salesValue: 156000 },
-  ],
+  points: correlation.points,
 };
 
 export const mockMacroCorrelationUsdBrl: MacroCorrelationData = {

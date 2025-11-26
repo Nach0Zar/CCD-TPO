@@ -1,0 +1,121 @@
+{
+  "indicator": "inflation",
+  "unit": "%%",
+  "points": [
+    {
+      "date": "2016-09",
+      "indicatorValue": 8.48,
+      "salesValue": 134.97
+    },
+    {
+      "date": "2016-10",
+      "indicatorValue": 7.87,
+      "salesValue": 40325.11
+    },
+    {
+      "date": "2016-12",
+      "indicatorValue": 6.29,
+      "salesValue": 10.9
+    },
+    {
+      "date": "2017-01",
+      "indicatorValue": 5.35,
+      "salesValue": 111798.36
+    },
+    {
+      "date": "2017-02",
+      "indicatorValue": 4.76,
+      "salesValue": 234223.4
+    },
+    {
+      "date": "2017-03",
+      "indicatorValue": 4.57,
+      "salesValue": 359198.85
+    },
+    {
+      "date": "2017-04",
+      "indicatorValue": 4.08,
+      "salesValue": 340669.68
+    },
+    {
+      "date": "2017-05",
+      "indicatorValue": 3.6,
+      "salesValue": 489338.25
+    },
+    {
+      "date": "2017-06",
+      "indicatorValue": 3,
+      "salesValue": 421923.37
+    },
+    {
+      "date": "2017-07",
+      "indicatorValue": 2.71,
+      "salesValue": 481604.52
+    },
+    {
+      "date": "2017-08",
+      "indicatorValue": 2.46,
+      "salesValue": 554699.7
+    },
+    {
+      "date": "2017-09",
+      "indicatorValue": 2.54,
+      "salesValue": 607399.67
+    },
+    {
+      "date": "2017-10",
+      "indicatorValue": 2.7,
+      "salesValue": 648247.65
+    },
+    {
+      "date": "2017-11",
+      "indicatorValue": 2.8,
+      "salesValue": 987765.37
+    },
+    {
+      "date": "2017-12",
+      "indicatorValue": 2.95,
+      "salesValue": 726033.19
+    },
+    {
+      "date": "2018-01",
+      "indicatorValue": 2.86,
+      "salesValue": 924645
+    },
+    {
+      "date": "2018-02",
+      "indicatorValue": 2.84,
+      "salesValue": 826437.13
+    },
+    {
+      "date": "2018-03",
+      "indicatorValue": 2.68,
+      "salesValue": 953356.25
+    },
+    {
+      "date": "2018-04",
+      "indicatorValue": 2.76,
+      "salesValue": 973534.09
+    },
+    {
+      "date": "2018-05",
+      "indicatorValue": 2.86,
+      "salesValue": 977544.69
+    },
+    {
+      "date": "2018-06",
+      "indicatorValue": 4.39,
+      "salesValue": 856077.86
+    },
+    {
+      "date": "2018-07",
+      "indicatorValue": 4.48,
+      "salesValue": 867953.46
+    },
+    {
+      "date": "2018-08",
+      "indicatorValue": 4.19,
+      "salesValue": 838576.64
+    }
+  ]
+}

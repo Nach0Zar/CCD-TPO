@@ -1,0 +1,208 @@
+{
+  "categories": [
+    {
+      "category": "beleza_saude",
+      "totalSales": 1258681.3399999687,
+      "ordersCount": 8836,
+      "itemsCount": 9670
+    },
+    {
+      "category": "relogios_presentes",
+      "totalSales": 1205005.6799999995,
+      "ordersCount": 5624,
+      "itemsCount": 5991
+    },
+    {
+      "category": "cama_mesa_banho",
+      "totalSales": 1036988.6800000713,
+      "ordersCount": 9417,
+      "itemsCount": 11115
+    },
+    {
+      "category": "esporte_lazer",
+      "totalSales": 988048.9700000401,
+      "ordersCount": 7720,
+      "itemsCount": 8641
+    },
+    {
+      "category": "informatica_acessorios",
+      "totalSales": 911954.3200000387,
+      "ordersCount": 6689,
+      "itemsCount": 7827
+    },
+    {
+      "category": "moveis_decoracao",
+      "totalSales": 729762.4900000412,
+      "ordersCount": 6449,
+      "itemsCount": 8334
+    },
+    {
+      "category": "cool_stuff",
+      "totalSales": 635290.8500000008,
+      "ordersCount": 3632,
+      "itemsCount": 3796
+    },
+    {
+      "category": "utilidades_domesticas",
+      "totalSales": 632248.6600000213,
+      "ordersCount": 5884,
+      "itemsCount": 6964
+    },
+    {
+      "category": "automotivo",
+      "totalSales": 592720.1100000106,
+      "ordersCount": 3897,
+      "itemsCount": 4235
+    },
+    {
+      "category": "ferramentas_jardim",
+      "totalSales": 485256.4600000147,
+      "ordersCount": 3518,
+      "itemsCount": 4347
+    },
+    {
+      "category": "brinquedos",
+      "totalSales": 483946.6000000053,
+      "ordersCount": 3886,
+      "itemsCount": 4117
+    },
+    {
+      "category": "bebes",
+      "totalSales": 411764.8900000044,
+      "ordersCount": 2885,
+      "itemsCount": 3065
+    },
+    {
+      "category": "perfumaria",
+      "totalSales": 399124.8700000015,
+      "ordersCount": 3162,
+      "itemsCount": 3419
+    },
+    {
+      "category": "telefonia",
+      "totalSales": 323667.529999989,
+      "ordersCount": 4199,
+      "itemsCount": 4545
+    },
+    {
+      "category": "moveis_escritorio",
+      "totalSales": 273960.6999999971,
+      "ordersCount": 1273,
+      "itemsCount": 1691
+    },
+    {
+      "category": "papelaria",
+      "totalSales": 230943.22999999588,
+      "ordersCount": 2311,
+      "itemsCount": 2517
+    },
+    {
+      "category": "pcs",
+      "totalSales": 222963.12999999983,
+      "ordersCount": 181,
+      "itemsCount": 203
+    },
+    {
+      "category": "pet_shop",
+      "totalSales": 214315.40999999666,
+      "ordersCount": 1710,
+      "itemsCount": 1947
+    },
+    {
+      "category": "instrumentos_musicais",
+      "totalSales": 191498.879999999,
+      "ordersCount": 628,
+      "itemsCount": 680
+    },
+    {
+      "category": "eletroportateis",
+      "totalSales": 190648.57999999935,
+      "ordersCount": 630,
+      "itemsCount": 679
+    },
+    {
+      "category": "eletronicos",
+      "totalSales": 160246.7399999967,
+      "ordersCount": 2550,
+      "itemsCount": 2767
+    },
+    {
+      "category": "consoles_games",
+      "totalSales": 157465.21999999895,
+      "ordersCount": 1062,
+      "itemsCount": 1137
+    },
+    {
+      "category": "fashion_bolsas_e_acessorios",
+      "totalSales": 152823.53999999774,
+      "ordersCount": 1864,
+      "itemsCount": 2031
+    },
+    {
+      "category": "ferramentas construcao",
+      "totalSales": 144677.58999999968,
+      "ordersCount": 748,
+      "itemsCount": 929
+    },
+    {
+      "category": "malas_acessorios",
+      "totalSales": 140429.97999999835,
+      "ordersCount": 1034,
+      "itemsCount": 1092
+    },
+    {
+      "category": "eletrodomesticos_2",
+      "totalSales": 113317.73999999992,
+      "ordersCount": 234,
+      "itemsCount": 238
+    },
+    {
+      "category": "casa_construcao",
+      "totalSales": 83088.11999999998,
+      "ordersCount": 490,
+      "itemsCount": 604
+    },
+    {
+      "category": "eletrodomesticos",
+      "totalSales": 80171.53000000006,
+      "ordersCount": 764,
+      "itemsCount": 771
+    },
+    {
+      "category": "agro_industria_e_comercio",
+      "totalSales": 72530.47000000002,
+      "ordersCount": 182,
+      "itemsCount": 212
+    },
+    {
+      "category": "moveis_sala",
+      "totalSales": 68916.5600000002,
+      "ordersCount": 422,
+      "itemsCount": 503
+    },
+    {
+      "category": "telefonia_fixa",
+      "totalSales": 59582.99999999998,
+      "ordersCount": 217,
+      "itemsCount": 264
+    },
+    {
+      "category": "casa_conforto",
+      "totalSales": 58572.04000000023,
+      "ordersCount": 397,
+      "itemsCount": 434
+    },
+    {
+      "category": "climatizacao",
+      "totalSales": 55024.96000000008,
+      "ordersCount": 253,
+      "itemsCount": 297
+    },
+    {
+      "category": "audio",
+      "totalSales": 50688.50000000011,
+      "ordersCount": 350,
+      "itemsCount": 364
+    }
+  ]
+}

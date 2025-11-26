@@ -1,0 +1,139 @@
+{
+  "states": [
+    {
+      "state": "SP",
+      "totalSales": 5067633.16,
+      "ordersCount": 40501
+    },
+    {
+      "state": "RJ",
+      "totalSales": 1759651.13,
+      "ordersCount": 12350
+    },
+    {
+      "state": "MG",
+      "totalSales": 1552481.83,
+      "ordersCount": 11354
+    },
+    {
+      "state": "RS",
+      "totalSales": 728897.47,
+      "ordersCount": 5345
+    },
+    {
+      "state": "PR",
+      "totalSales": 666063.51,
+      "ordersCount": 4923
+    },
+    {
+      "state": "SC",
+      "totalSales": 507012.13,
+      "ordersCount": 3546
+    },
+    {
+      "state": "BA",
+      "totalSales": 493584.14,
+      "ordersCount": 3256
+    },
+    {
+      "state": "DF",
+      "totalSales": 296498.41,
+      "ordersCount": 2080
+    },
+    {
+      "state": "GO",
+      "totalSales": 282836.7,
+      "ordersCount": 1957
+    },
+    {
+      "state": "ES",
+      "totalSales": 268643.45,
+      "ordersCount": 1995
+    },
+    {
+      "state": "PE",
+      "totalSales": 251889.49,
+      "ordersCount": 1593
+    },
+    {
+      "state": "CE",
+      "totalSales": 219757.38,
+      "ordersCount": 1279
+    },
+    {
+      "state": "PA",
+      "totalSales": 174470.59,
+      "ordersCount": 946
+    },
+    {
+      "state": "MT",
+      "totalSales": 152191.62,
+      "ordersCount": 886
+    },
+    {
+      "state": "MA",
+      "totalSales": 117009.38,
+      "ordersCount": 717
+    },
+    {
+      "state": "MS",
+      "totalSales": 115429.97,
+      "ordersCount": 701
+    },
+    {
+      "state": "PB",
+      "totalSales": 112586.82,
+      "ordersCount": 517
+    },
+    {
+      "state": "PI",
+      "totalSales": 84721,
+      "ordersCount": 476
+    },
+    {
+      "state": "RN",
+      "totalSales": 82105.66,
+      "ordersCount": 474
+    },
+    {
+      "state": "AL",
+      "totalSales": 78855.72,
+      "ordersCount": 397
+    },
+    {
+      "state": "SE",
+      "totalSales": 56574.19,
+      "ordersCount": 335
+    },
+    {
+      "state": "TO",
+      "totalSales": 48402.51,
+      "ordersCount": 274
+    },
+    {
+      "state": "RO",
+      "totalSales": 45682.76,
+      "ordersCount": 243
+    },
+    {
+      "state": "AM",
+      "totalSales": 22155.84,
+      "ordersCount": 145
+    },
+    {
+      "state": "AC",
+      "totalSales": 15930.97,
+      "ordersCount": 80
+    },
+    {
+      "state": "AP",
+      "totalSales": 13374.81,
+      "ordersCount": 67
+    },
+    {
+      "state": "RR",
+      "totalSales": 7057.47,
+      "ordersCount": 41
+    }
+  ]
+}

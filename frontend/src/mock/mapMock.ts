@@ -5,6 +5,7 @@ import type {
 
 import data from '@/mock/realCustomersHeatMap.json'
 import CandS from '@/mock/customersNSelerres.json'
+import customersYsellers from '@/mock/CYSProbarOP2.json'
 
 const baseHeatmapPoints = data.points;
 
@@ -54,8 +55,8 @@ const buildExpandedPoints = (points: typeof baseCustomerPoints, offsetMultiplier
       })),
   );
 
-const expandedCustomers = CandS.customers;
-const expandedSellers = CandS.sellers;
+const expandedCustomers = customersYsellers.customers;
+const expandedSellers = customersYsellers.sellers;
 
 export const customerSellerMapMock: CustomerSellerMapData = {
   customers: expandedCustomers.map(({ lat, lon }) => ({ lat, lon })),
