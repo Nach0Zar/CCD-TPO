@@ -51,10 +51,10 @@ const Landing = () => {
             <Card className="shadow-lg">
               <CardContent className="pt-6">
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Durante los periodos de <span className="font-semibold text-foreground">crecimiento económico</span> (PIB en alza, baja inflación y desempleo), aumenta la cantidad de pedidos online; en cambio, durante <span className="font-semibold text-foreground">recesiones o alta inflación</span>, la demanda tiende a contraerse.
+                  La demanda de e-commerce en Brasil se organiza en patrones geográficos estables <span className="font-semibold text-foreground">definidos por densidad de clientes y características de consumo locales</span> que se ven modulados por las condiciones macroeconómicas (crecimiento del PIB, inflación, empleo).
                 </p>
                 <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-                  Este conocimiento permite a las empresas <span className="font-semibold text-foreground">anticipar la demanda</span>, ajustar precios, gestionar inventarios y optimizar campañas digitales con base en datos reales y contexto macroeconómico.
+                  Si estos patrones se analizan conjuntamente, es posible identificar micro-zonas con mayor potencial logístico y predecir su evolución futura, permitiendo ubicar warehouses de forma óptima y anticipar cambios en la demanda.
                 </p>
               </CardContent>
             </Card>
