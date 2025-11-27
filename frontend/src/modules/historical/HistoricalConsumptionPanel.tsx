@@ -88,7 +88,7 @@ const HistoricalConsumptionPanel = () => {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="h-full">
           <CardHeader>
-            <CardTitle>Evolución de ventas</CardTitle>
+            <CardTitle>Evolución de Ordenes</CardTitle>
             <CardDescription>Histórico de ventas por mes</CardDescription>
           </CardHeader>
           <CardContent>
