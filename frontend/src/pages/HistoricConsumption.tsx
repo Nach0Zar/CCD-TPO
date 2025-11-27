@@ -184,69 +184,7 @@ const HistoricConsumption = () => {
           <HistoricalConsumptionPanel />
           <GeoEconomicPanel />
           <BrazilMapLayers />
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Tendencias Temporales</CardTitle>
-              <CardDescription>
-                Visualización de la evolución de pedidos online correlacionada con indicadores macroeconómicos
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ReactECharts option={lineChartOption} style={{ height: "400px" }} />
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>Distribución por Categoría</CardTitle>
-                <CardDescription>
-                  Volumen de pedidos segmentado por categorías de productos
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ReactECharts option={barChartOption} style={{ height: "350px" }} />
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>Insights Clave</CardTitle>
-                <CardDescription>Principales observaciones del período analizado</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="rounded-lg bg-muted/50 p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="h-3 w-3 rounded-full bg-chart-1"></div>
-                      <h4 className="font-semibold">Crecimiento Sostenido</h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Los pedidos online muestran una tendencia positiva del +100% en el año
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-muted/50 p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="h-3 w-3 rounded-full bg-chart-2"></div>
-                      <h4 className="font-semibold">Correlación con PIB</h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Existe una correlación positiva entre el crecimiento del PIB y los pedidos
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-muted/50 p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="h-3 w-3 rounded-full bg-chart-3"></div>
-                      <h4 className="font-semibold">Impacto de Inflación</h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      La reducción de inflación coincide con aumento en el consumo online
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+      
         </div>
       </div>
     </div>

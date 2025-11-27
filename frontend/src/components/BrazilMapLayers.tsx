@@ -33,7 +33,7 @@ const BrazilMapLayers = () => {
   const [heatmapData, setHeatmapData] = useState<CustomerHeatmapData | null>(null);
   const [pointData, setPointData] = useState<CustomerSellerMapData | null>(null);
   const [visibleLayers, setVisibleLayers] = useState<Record<LayerKey, boolean>>({
-    heatmap: true,
+    heatmap: false,
     customers: true,
     sellers: true,
   });
